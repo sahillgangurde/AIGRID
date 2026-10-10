@@ -14,6 +14,8 @@ import { ThemeProvider } from "@/components/theme-toggle";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { supabase, syncSupabaseUserWithBackend, isSupabaseConfigured } from "../lib/supabase";
+import { signIn } from "../lib/demo-session";
 
 function NotFoundComponent() {
   return (
@@ -116,16 +118,51 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function SupabaseGlobalAuthSync() {
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
+    // Check existing active Supabase session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.email) {
+        syncSupabaseUserWithBackend(session.user).then(() => {
+          signIn(session.user.email!, 'google');
+        });
+      }
+    });
+
+    // Listen for live OAuth redirects and sign-ins
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user?.email) {
+        await syncSupabaseUserWithBackend(session.user);
+        signIn(session.user.email, 'google');
+
+        if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  return null;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-      <Header />
-      <Outlet />
-      <Footer />
+        <SupabaseGlobalAuthSync />
+        <Header />
+        <Outlet />
+        <Footer />
       </ThemeProvider>
     </QueryClientProvider>
   );
 }
+

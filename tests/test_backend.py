@@ -332,3 +332,25 @@ def test_20_errors_handled_safely():
     assert res.status_code == 401
     assert "password_hash" not in res.text
     assert "secret" not in res.text.lower()
+
+
+# 21. Supabase / Google OAuth sync creates profile and returns valid JWT
+def test_21_supabase_google_oauth_sync():
+    res = client.post("/api/auth/google-sync", json={
+        "email": "test.google.user@example.com",
+        "display_name": "Google Test Creator",
+        "role": "creator"
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert "access_token" in data
+    assert data["user"]["username"] == "test.google.user@example.com"
+    assert data["user"]["display_name"] == "Google Test Creator"
+    assert data["user"]["role"] == "creator"
+
+    # Verify user can access authenticated endpoints with the token
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
+    me_res = client.get("/api/auth/me", headers=headers)
+    assert me_res.status_code == 200
+    assert me_res.json()["username"] == "test.google.user@example.com"
+

@@ -33,6 +33,13 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
+class GoogleSyncRequest(BaseModel):
+    email: str
+    display_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    google_id: Optional[str] = None
+    role: Optional[str] = "creator"
+
 class ProfileUpdateRequest(BaseModel):
     display_name: Optional[str] = None
     bio: Optional[str] = None
@@ -154,6 +161,105 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         resource_type="profile",
         resource_id=user.id,
         metadata_json=json.dumps({"ip": "local_session"})
+    ))
+    db.commit()
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "display_name": user.display_name,
+            "role": user.role,
+            "avatar_url": user.avatar_url,
+            "account_status": user.account_status
+        }
+    }
+
+@router.post("/google-sync")
+def google_sync(req: GoogleSyncRequest, db: Session = Depends(get_db)):
+    """
+    Synchronizes a Supabase / Google OAuth user with the persistent backend database.
+    Creates or retrieves the Profile and issues a full backend JWT access token.
+    """
+    clean_email = req.email.strip().lower()
+    if not clean_email or "@" not in clean_email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Valid email address is required.")
+
+    normalized = AuthService.normalize_username(clean_email)
+    user = db.query(Profile).filter(Profile.normalized_username == normalized).first()
+
+    if not user:
+        display_name = req.display_name or (clean_email.split("@")[0].replace(".", " ").title())
+        user = Profile(
+            username=clean_email[:50],
+            normalized_username=normalized[:50],
+            password_hash="google_oauth_authenticated",
+            display_name=display_name,
+            avatar_url=req.avatar_url or "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+            bio=f"AI Creator verified via Google OAuth ({clean_email})",
+            role=req.role if req.role in ("creator", "brand") else "creator",
+            account_status="active"
+        )
+        db.add(user)
+        db.flush()
+
+        if user.role == "creator":
+            cp = CreatorProfile(
+                user_id=user.id,
+                specializations=json.dumps(["AI Filmmaking", "Generative Direction"]),
+                skills=json.dumps(["Prompt Engineering", "Temporal Consistency"]),
+                ai_tools=json.dumps(["Midjourney", "Runway Gen-3", "ComfyUI"]),
+                ai_models=json.dumps(["Flux.1 Dev"]),
+                supported_content_types=json.dumps(["Social Video Commercial", "AI Short Film"]),
+                aspect_ratios=json.dumps(["9:16 (Vertical Reels/TikTok)", "16:9 (Cinema)"]),
+                minimum_budget=2000.0,
+                hourly_compute_rate=45.0,
+                availability_status="available"
+            )
+            db.add(cp)
+        else:
+            bp = BrandProfile(
+                user_id=user.id,
+                brand_name=display_name,
+                public_alias=display_name,
+                is_confidential=False,
+                visibility_mode="public",
+                industry="Digital Media",
+                organization_details=json.dumps({})
+            )
+            db.add(bp)
+
+        from server.services.subscription_service import SubscriptionService
+        SubscriptionService.ensure_subscription(db, user)
+
+        db.commit()
+        db.refresh(user)
+
+    if user.account_status == "suspended":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account has been suspended.")
+
+    # Refresh avatar or display name if provided by Google
+    updated = False
+    if req.avatar_url and (not user.avatar_url or "unsplash" in user.avatar_url):
+        user.avatar_url = req.avatar_url
+        updated = True
+    if req.display_name and not user.display_name:
+        user.display_name = req.display_name
+        updated = True
+    if updated:
+        db.commit()
+        db.refresh(user)
+
+    token = AuthService.create_access_token({"sub": user.id, "role": user.role, "username": user.username})
+
+    db.add(AuditLog(
+        actor_id=user.id,
+        action="GOOGLE_OAUTH_LOGIN",
+        resource_type="profile",
+        resource_id=user.id,
+        metadata_json=json.dumps({"provider": "google", "email": clean_email})
     ))
     db.commit()
 

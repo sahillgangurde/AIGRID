@@ -4,6 +4,8 @@ import { ArrowRight, Check, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { setRole, signIn, signOut, useDemoSession, type DemoRole } from '@/lib/demo-session';
+import { signInWithGoogle, isSupabaseConfigured } from '@/lib/supabase';
+import { setStoredToken } from '@/lib/auth-headers';
 
 const roles: { id: DemoRole; title: string; text: string }[] = [
   { id: 'creator', title: "I'm a Creator", text: 'Showcase work, get discovered, win awards.' },
@@ -70,12 +72,77 @@ export function AccountDialog({ open, onOpenChange }: { open: boolean; onOpenCha
           <DialogTitle>{mode === 'login' ? 'Sign in to AiGrid' : mode === 'signup' ? 'Create your account' : 'Forgot password?'}</DialogTitle>
           <DialogDescription>{mode === 'login' ? 'Welcome back! Please sign in to continue' : mode === 'signup' ? 'Join the filmmaking community' : 'Enter your email to reset your password'}</DialogDescription>
           {session && mode !== 'forgot' && <p className="account-notice" role="status">Signed in as {session.email}. <Button type="button" variant="link" onClick={() => signOut()}>Sign out</Button></p>}
-          {mode !== 'forgot' && <><Button variant="outline" className="account-google" onClick={() => { signIn('guest@gmail.com', 'google'); afterSignIn(); }}><span className="google-letter" aria-hidden="true">G</span>Continue with Google</Button><div className="account-divider"><span>or</span></div></>}
-          <form key={mode} onSubmit={event => {
+          {mode !== 'forgot' && <>
+            <Button
+              variant="outline"
+              className="account-google"
+              onClick={async () => {
+                if (isSupabaseConfigured) {
+                  try {
+                    await signInWithGoogle(window.location.href);
+                  } catch (err) {
+                    console.error('Supabase Google Sign-In error:', err);
+                  }
+                } else {
+                  const inputEmail = window.prompt(
+                    'Supabase credentials pending in .env. Enter your email to test instant persistent SQLite sync:',
+                    email || 'creator@gmail.com'
+                  );
+                  if (!inputEmail) return;
+                  const clean = inputEmail.trim();
+                  try {
+                    const res = await fetch('/api/auth/google-sync', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        email: clean,
+                        display_name: clean.split('@')[0],
+                        role: 'creator',
+                      }),
+                    });
+                    if (res.ok) {
+                      const data = await res.json();
+                      if (data.access_token) setStoredToken(data.access_token);
+                    }
+                  } catch (err) {
+                    console.warn('Backend sync fallback error:', err);
+                  }
+                  signIn(clean, 'google');
+                  afterSignIn();
+                }
+              }}
+            >
+              <span className="google-letter" aria-hidden="true">G</span>
+              Continue with Google
+            </Button>
+            <div className="account-divider"><span>or</span></div>
+          </>}
+          <form key={mode} onSubmit={async event => {
             event.preventDefault();
             const value = email.trim();
             if (!value) return;
             if (mode === 'forgot') { setResetTo(value); return; }
+
+            try {
+              const formEl = event.currentTarget;
+              const pwInput = (formEl.elements.namedItem('password') as HTMLInputElement)?.value || 'Password123!';
+              const endpoint = mode === 'signup' ? '/api/auth/signup' : '/api/auth/login';
+              const payload = mode === 'signup'
+                ? { username: value, password: pwInput, display_name: value.split('@')[0], role: 'creator' }
+                : { username: value, password: pwInput };
+              const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              });
+              if (res.ok) {
+                const data = await res.json();
+                if (data.access_token) setStoredToken(data.access_token);
+              }
+            } catch (err) {
+              console.warn('Backend authentication offline, continuing demo mode:', err);
+            }
+
             signIn(value);
             if (mode === 'signup') afterSignIn();
             else close();
