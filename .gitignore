@@ -38,6 +38,7 @@ dist-ssr
 .tanstack
 .freebuff
 .lovable
+.vercel
 
 # Temporary archives and visual verification screenshots
 *.zip
