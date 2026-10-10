@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm --prefix frameforge_ui run dev",
-    "build": "npm --prefix frameforge_ui install && npm --prefix frameforge_ui run build && node -e \"require('fs').cpSync('frameforge_ui/.vercel/output', '.vercel/output', {recursive: true})\"",
+    "build": "npm --prefix frameforge_ui run build",
     "lint": "oxlint",
     "preview": "npm --prefix frameforge_ui run preview"
   },
