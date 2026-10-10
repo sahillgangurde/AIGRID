@@ -3,8 +3,8 @@ import { creators, homeCreators } from '@/lib/hypear-data';
 
 describe('home page creator section', () => {
   it('shows only the three approved creators, in the agreed order with anonymous aliases', () => {
-    expect(homeCreators.map(c => c.slug)).toEqual(['creator-1042', 'creator-1087', 'creator-1126']);
-    expect(homeCreators.map(c => c.name)).toEqual(['Creator #1042', 'Creator #1087', 'Creator #1126']);
+    expect(homeCreators.map(c => c.slug)).toEqual(['ananya-rao', 'riddhi-shah', 'kavya-iyer']);
+    expect(homeCreators.map(c => c.name)).toEqual(['Ananya Rao', 'Riddhi Shah', 'Kavya Iyer']);
   });
 
   it('keeps the other six creators in the directory', () => {

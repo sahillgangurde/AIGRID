@@ -4,12 +4,17 @@ import {Button} from '@/components/ui/button';
 import creator0 from '@/assets/creator-0.jpg.asset.json';
 import creator2 from '@/assets/creator-2.jpg.asset.json';
 import creator4 from '@/assets/creator-4.jpg.asset.json';
+import pondoImg from '@/assets/reel-pondo.jpg.asset.json';
+import voxImg from '@/assets/reel-vox.jpg.asset.json';
 import {FILM_STEP,loopPosition,swipeVelocity} from '@/lib/film-wheel-motion';
 // Films showcased on the platform wheel — all by creators listed on AiGrid.
 const films=[
- {title:'Editorial Campaign — Monsoon Streets',author:'Creator #1042',image:creator0.url},
- {title:'Brand Lookbook — Studio Portraits',author:'Creator #1087',image:creator2.url},
- {title:'AI Short — Neon Bakery Reel',author:'Creator #1126',image:creator4.url},
+ {title:'PONDO',author:'Pondo',image:pondoImg.url,badge:'NEWEST',votes:'3 VOTES'},
+ {title:'tiny tales | „dive“',author:'Florian Meimberg',image:'',badge:'NEWEST',votes:'3 VOTES'},
+ {title:'🎬 Coming Soon: VOXSTYLE AI',author:'baal fur',image:voxImg.url,badge:'NEWEST',votes:''},
+ {title:'Editorial Campaign — Monsoon Streets',author:'Ananya Rao',image:creator0.url,badge:'Featured',votes:''},
+ {title:'Brand Lookbook — Studio Portraits',author:'Riddhi Shah',image:creator2.url,badge:'Featured',votes:''},
+ {title:'AI Short — Neon Bakery Reel',author:'Kavya Iyer',image:creator4.url,badge:'Featured',votes:''},
 ];
 export function FilmWheel({onFilmChange}:{onFilmChange:(author:string)=>void}){
  const viewport=useRef<HTMLDivElement>(null);
@@ -55,7 +60,7 @@ export function FilmWheel({onFilmChange}:{onFilmChange:(author:string)=>void}){
    onPointerUp={e=>{const m=motion.current;m.dragging=false;m.pauseUntil=performance.now()+1000;if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}}
    onPointerCancel={()=>{motion.current.dragging=false;motion.current.velocity=0;}}
    onClickCapture={e=>{if(motion.current.moved>6){e.preventDefault();e.stopPropagation();}}}>
-   <div className="film-track">{Array.from({length:5},(_,copy)=>films.map((film,index)=><div className="film-slide" key={`${copy}-${index}`}><a className={`reel-film scrolling-film film-kind-${index}`} href="/creators" draggable={false}>{film.image&&<img src={film.image} alt={film.title} draggable={false}/>}<div className="reel-film-body"><div className="film-meta"><span>0{index+1} / 03</span><span className="film-badge">Featured</span><span>{film.image?'Portfolio':'Vote planned'}</span></div><h3>{film.title}</h3><div className="film-author"><span>{film.author.charAt(0).toUpperCase()}</span>{film.author}</div></div></a></div>))}</div>
+   <div className="film-track">{Array.from({length:5},(_,copy)=>films.map((film,index)=><div className="film-slide" key={`${copy}-${index}`}><a className={`reel-film scrolling-film film-kind-${index}`} href="/creators" draggable={false}>{film.image&&<img src={film.image} alt={film.title} draggable={false}/>}<div className="reel-film-body"><div className="film-meta"><span>0{index+1} / 06</span><span className="film-badge">{film.badge||'Featured'}</span><span>{film.votes||(film.image?'Portfolio':'Vote planned')}</span></div><h3>{film.title}</h3><div className="film-author"><span>{film.author.charAt(0).toUpperCase()}</span>{film.author}</div></div></a></div>))}</div>
   </div><div className="wheel-controls"><Button variant="outline" size="icon" aria-label="Previous film" onClick={()=>step(-1)}><ChevronLeft/></Button><Button size="icon" aria-label="Next film" onClick={()=>step(1)}><ChevronRight/></Button></div>
  </div>;
 }
