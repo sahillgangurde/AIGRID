@@ -1,0 +1,56 @@
+# Environment variables
+.env
+*.env
+!.env.example
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+server/data/drafts/*
+!server/data/drafts/.gitkeep
+
+# Python cache & test files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+server-uvicorn.log
+
+# Node dependencies & build artifacts
+node_modules
+dist
+dist-ssr
+*.local
+.output
+.wrangler
+.tanstack
+.freebuff
+.lovable
+
+# Temporary archives and visual verification screenshots
+*.zip
+output_visual_check_*.png
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+

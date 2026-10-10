@@ -1,0 +1,31 @@
+# Hypear website recreation
+- [x] Recreate Hypear’s home page, imagery, and shared navigation.
+- [x] Add creator browsing, profiles, how-it-works, login, and legal pages (real account access and full policies link to Hypear).
+- [x] Verify navigation, filtering, and page rendering.
+- [x] Apply the requested social-profile interface to every creator and verify card-to-profile navigation.
+- [x] Curve the film wheel inward and outward while retaining automatic scrolling and swipe momentum.
+- [x] Animate the four homepage totals counting up on each visit and verify their final values.
+- [x] Replace the homepage logo bar with a four-section bar (Discover, How it works, Search creator, Become creator) and verify each entry.
+- [x] Add the uploaded reference content into the "Search creator" section of the homepage bar.
+- [x] Match the shared footer to the uploaded ReelStack footer reference.
+- [x] Add and verify the appearance-only sign-in/sign-up pop-up, keeping real accounts and profile storage unconnected.
+- [x] Match the upper bar’s style to the new screenshot without changing its section names.
+- [x] Add creator-only Pricing page to upper bar (black/white, fully enclosed plan boxes).
+- [x] Add the auto-sliding AI-tool logo strip with original colors and names on hover, and verify it.
+- [x] Rename the site brand to AiGrid in the header, footer, sign-in dialog, page titles and copyright, and verify every page.
+- [x] Add an animated light/dark theme switch and verify readability across pages and dialogs.
+- [x] Redesign only the footer with five AIgrid columns, campaign invitation, legal/social row, and verify layouts and existing-page links.
+- [x] Animate the pairing pear rotating and joining on scroll, and verify separated and whole states.
+- [x] Replace the homepage headline, description, and button labels with the approved copy, and keep the phone layout from scrolling sideways.
+- [x] Rename the four homepage counters (Creators, Content traded, Briefs generated, Matchings) and keep every label clear of its neighbour on phones.
+- [x] Remove the duplicate talent page and its menu link, keeping the creator cards on the home page and the search page.
+- [x] Make the demo sign-in accept any input with no limits, keep only the email in this browser, and verify sign in, persistence, sign out and the reset message.
+- [x] Show only Ananya Rao, Riddhi Shah and Kavya Iyer in the home page creator section, keeping all nine in the search page.
+- [x] Make Discover and footer Creative Feed open a vertical reels feed; verify playback, scrolling and social demo controls.
+- [x] Add notification bell beside profile icon with sample notifications, visible only after sign-in.
+- [x] Profile avatar opens a dropdown menu (Manage account, Dashboard, My Work, Profile, Notifications, Sign out) when signed in.
+- [ ] Push the project to GitHub with a well-structured README explaining features for the hackathon.
+- [ ] Deploy the app on Vercel so it stays live for the 4-5 hackathon days.
+- [x] Messages pill bottom-right after sign-in with an end-to-end encryption notice popup.
+- [x] Replace the Hypear privacy policy page with the AIgrid privacy policy text.
+- [x] Replace the Hypear terms page with the AIgrid Terms of Use text, with a link to /privacy.

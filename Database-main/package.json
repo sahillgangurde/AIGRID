@@ -1,0 +1,35 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "> **CreatorSphere AI**: An AI-powered video creator marketplace connecting customers needing high-impact videos with skilled creators across AI generation, 3D animation, editing, product ads, cinematic films, and social reels.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests/validate_sql_syntax.js && node tests/test_live_pg_execution.js && node tests/security_adversarial_test.js",
+    "test:db": "node tests/validate_sql_syntax.js && node tests/test_live_pg_execution.js && node tests/security_adversarial_test.js",
+    "test:static": "node tests/validate_sql_syntax.js",
+    "test:engine": "node tests/test_live_pg_execution.js",
+    "test:security": "node tests/security_adversarial_test.js",
+    "test:integration": "node tests/marketplace_integration_test.js",
+    "test:all": "node tests/validate_sql_syntax.js && node tests/test_live_pg_execution.js && node tests/security_adversarial_test.js && node tests/marketplace_integration_test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/localhost3k11/Database-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/localhost3k11/Database-/issues"
+  },
+  "homepage": "https://github.com/localhost3k11/Database-#readme",
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "pg-mem": "^3.0.14"
+  }
+}
