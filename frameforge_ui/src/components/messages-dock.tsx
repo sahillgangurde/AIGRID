@@ -9,8 +9,11 @@ type Msg = { from: 'me' | 'them'; text: string; redacted?: boolean };
 
 // PII Detection patterns matching FRAME Security Specification
 const PII_PATTERNS = [
-  { type: 'Phone Number', badge: '📵 [Phone Blocked]', regex: /\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b|\b[6-9]\d{9}\b/g },
+  { type: 'Personal Name Disclosure', badge: '👤 [Name Blocked]', regex: /\b(?:my\s+name\s+is|i\s+am|call\s+me|my\s+full\s+name\s+is)\s+(?:Ananya(?:\s+Rao)?|Riddhi(?:\s+Shah)?|Kavya(?:\s+Iyer)?|Rahul(?:\s+Sharma)?|[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b|\b(?:Ananya\s+Rao|Riddhi\s+Shah|Kavya\s+Iyer|Rahul\s+Sharma)\b/gi },
+  { type: 'Phone Number', badge: '📵 [Phone Blocked]', regex: /(?:\+91[\s\-]?)?\b[6-9]\d{9}\b|\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g },
+  { type: 'Spelled-Out Phone Number', badge: '📵 [Phone Blocked]', regex: /\b(?:zero|one|two|three|four|five|six|seven|eight|nine)(?:[\s\-,]+(?:zero|one|two|three|four|five|six|seven|eight|nine)){6,}\b/gi },
   { type: 'Email Address', badge: '✉️ [Email Blocked]', regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g },
+  { type: 'Social Media Handle', badge: '🔒 [Handle Blocked]', regex: /(?<!\w)@[a-zA-Z0-9_.]{3,30}\b|\b(?:find\s+me\s+on\s+instagram\s+at|on\s+instagram\s+at)\s+[a-zA-Z0-9_.]+\b/gi },
   { type: 'UPI Payment ID', badge: '💳 [UPI Blocked]', regex: /[a-zA-Z0-9.\-_]{2,256}@(okaxis|okhdfcbank|okicici|oksbi|paytm|ybl|axl|ibl|upi)/gi },
   { type: 'Off-Platform Direct Contact', badge: '🚫 [Link Blocked]', regex: /\b(whatsapp|telegram|wa\.me|t\.me|linkedin|call me at|phone me at|dm me on)\b/gi }
 ];
@@ -45,7 +48,7 @@ export function MessagesDock() {
   const [threads, setThreads] = useState<Record<string, Msg[]>>(() =>
     Object.fromEntries(creators.map(c => [
       c.slug, 
-      [{ from: 'them' as const, text: `Hi! I'm ${c.name.split(' ')[0]}. Happy to discuss project specs, compute requirements, or review a brief.` }]
+      [{ from: 'them' as const, text: `Hi! I'm ${c.name}. Happy to discuss project specs, compute requirements, or review a brief.` }]
     ]))
   );
   const [unread, setUnread] = useState(homeCreators.length);

@@ -7,9 +7,9 @@ import creator4 from '@/assets/creator-4.jpg.asset.json';
 import {FILM_STEP,loopPosition,swipeVelocity} from '@/lib/film-wheel-motion';
 // Films showcased on the platform wheel — all by creators listed on AiGrid.
 const films=[
- {title:'Editorial Campaign — Monsoon Streets',author:'Ananya Rao',image:creator0.url},
- {title:'Brand Lookbook — Studio Portraits',author:'Riddhi Shah',image:creator2.url},
- {title:'AI Short — Neon Bakery Reel',author:'Kavya Iyer',image:creator4.url},
+ {title:'Editorial Campaign — Monsoon Streets',author:'Creator #1042',image:creator0.url},
+ {title:'Brand Lookbook — Studio Portraits',author:'Creator #1087',image:creator2.url},
+ {title:'AI Short — Neon Bakery Reel',author:'Creator #1126',image:creator4.url},
 ];
 export function FilmWheel({onFilmChange}:{onFilmChange:(author:string)=>void}){
  const viewport=useRef<HTMLDivElement>(null);

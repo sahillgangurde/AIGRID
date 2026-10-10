@@ -48,10 +48,10 @@ export function AIBriefDialog({ open, onOpenChange, onBriefCreated }: AIBriefDia
       const data = await res.json();
       setStructured(data);
     } catch (err: any) {
-      setError('Could not connect to AI generation engine. Using fallback preview.');
       // Heuristic fallback preview if backend is unreachable
+      const numBudget = parseFloat(budget) || (currency === 'INR' ? 75000 : 3500);
       setStructured({
-        title: `${brandName} • Commercial Video Campaign`,
+        title: `${brandName.trim() || 'Confidential Brand'} • Commercial Video Campaign`,
         objective: rawIdea,
         content_type: 'Social Video Commercial',
         style: 'High-Energy Kinetic Cinema',
@@ -59,7 +59,10 @@ export function AIBriefDialog({ open, onOpenChange, onBriefCreated }: AIBriefDia
         commercial_use: 'Full Commercial Buyout with C2PA Provenance',
         tools_recommended: ['Runway Gen-3', 'ComfyUI', 'FLUX.1 Dev'],
         required_skills: ['Temporal Consistency', 'Motion Control'],
-        budget_usd: parseFloat(budget) || 3500,
+        budget_usd: currency === 'USD' ? numBudget : Math.round(numBudget / 83),
+        budget_inr: currency === 'INR' ? numBudget : Math.round(numBudget * 83),
+        budget_target: numBudget,
+        currency: currency,
         timeline_days: 7,
         clarifying_questions: ['Do you have raw footage or should 100% synthetic scenes be generated?']
       });
@@ -73,9 +76,10 @@ export function AIBriefDialog({ open, onOpenChange, onBriefCreated }: AIBriefDia
     setIsPosting(true);
     setError(null);
     try {
+      const numBudget = parseFloat(budget) || (currency === 'INR' ? 75000 : 3500);
       const payload = {
         title: structured.title,
-        brand_name: brandName || 'Brand Studio',
+        brand_name: 'Confidential Brand Partner',
         objective: structured.objective,
         description: rawIdea,
         content_type: structured.content_type,
@@ -84,24 +88,53 @@ export function AIBriefDialog({ open, onOpenChange, onBriefCreated }: AIBriefDia
         commercial_use: structured.commercial_use,
         tools_recommended: structured.tools_recommended,
         required_skills: structured.required_skills,
-        budget_usd: structured.budget_usd || 3500,
+        budget_usd: currency === 'USD' ? numBudget : Math.round(numBudget / 83),
+        budget_inr: currency === 'INR' ? numBudget : Math.round(numBudget * 83),
+        budget_min: Math.round(numBudget * 0.8),
+        budget_max: numBudget,
         currency: currency,
         timeline_days: structured.timeline_days || 7,
-        confidentiality: 'public'
+        confidentiality: 'confidential'
       };
 
-      const res = await fetch('/api/briefs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      let savedBrief: any = null;
+      try {
+        const res = await fetch('/api/briefs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          savedBrief = data.brief || data;
+        }
+      } catch (networkErr) {
+        // API offline or on Vercel static deployment
+      }
 
-      if (!res.ok) throw new Error('Failed to save brief');
-      const data = await res.json();
-      setPostedSuccess(data.brief || data);
-      if (onBriefCreated) onBriefCreated(data.brief || data);
+      // If backend API wasn't available, persist to browser persistent database
+      if (!savedBrief) {
+        const briefId = 'brief-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now();
+        savedBrief = {
+          id: briefId,
+          ...payload,
+          status: 'OPEN_FOR_PITCHES',
+          matched_creator_ids: ['creator-1042', 'creator-1087', 'creator-1126'],
+          created_at: new Date().toISOString()
+        };
+        try {
+          const existing = JSON.parse(localStorage.getItem('aigrid_creative_briefs') || '[]');
+          existing.unshift(savedBrief);
+          localStorage.setItem('aigrid_creative_briefs', JSON.stringify(existing));
+        } catch (storageErr) {
+          console.warn('Storage warning', storageErr);
+        }
+      }
+
+      setPostedSuccess(savedBrief);
+      if (onBriefCreated) onBriefCreated(savedBrief);
     } catch (err: any) {
-      setError('Failed to persist brief to database. Please try again.');
+      setError('Failed to persist brief to database. Please check connection and try again.');
     } finally {
       setIsPosting(false);
     }
@@ -184,7 +217,11 @@ export function AIBriefDialog({ open, onOpenChange, onBriefCreated }: AIBriefDia
                 </div>
                 <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 10, padding: '10px 14px' }}>
                   <span style={{ fontSize: '0.74rem', color: '#6B7280', fontWeight: 700, textTransform: 'uppercase' }}>Estimated Budget</span>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#10B981', marginTop: 2 }}>${structured.budget_usd || budget} USD</div>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#10B981', marginTop: 2 }}>
+                    {currency === 'INR' 
+                      ? `₹${Number(structured.budget_inr || structured.budget_target || budget).toLocaleString()} INR` 
+                      : `$${Number(structured.budget_usd || structured.budget_target || budget).toLocaleString()} USD`}
+                  </div>
                 </div>
               </div>
 

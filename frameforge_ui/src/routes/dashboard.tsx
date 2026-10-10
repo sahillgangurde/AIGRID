@@ -69,7 +69,7 @@ function Dashboard() {
             status: 'active',
             visibility_mode: 'confidential',
             brand_name: 'Confidential Brand Partner',
-            creator_name: 'Ananya Rao',
+            creator_name: 'Creator #1042',
             budget_amount: 120000,
             currency: 'INR',
             deadline: new Date(Date.now() + 12 * 86400000).toISOString(),

@@ -13,7 +13,19 @@ import { readTermsAgreement } from '@/lib/terms-agreement';
 
 export const Route = createFileRoute('/creators/$slug')({
   loader: async ({ params }) => {
-    let c = creators.find(item => item.slug === params.slug);
+    const legacyMap: Record<string, string> = {
+      'ananya-rao': 'creator-1042',
+      'riddhi-shah': 'creator-1087',
+      'kavya-iyer': 'creator-1126',
+      'sujal-tandel': 'creator-1158',
+      'parth-patel': 'creator-1194',
+      'mahir-khan': 'creator-1231',
+      'sahil-verma': 'creator-1275',
+      'arjun-mehta': 'creator-1312',
+      'rohan-singh': 'creator-1349',
+    };
+    const targetSlug = legacyMap[params.slug] || params.slug;
+    let c = creators.find(item => item.slug === targetSlug || item.slug === params.slug);
     if (!c) {
       try {
         const isServer = typeof window === 'undefined';
@@ -107,7 +119,7 @@ function Profile() {
           </div>
           <div className="social-details">
             <div className="social-handle">
-              <h1>{c.slug}</h1>
+              <h1>{c.name}</h1>
               <Button variant="ghost" size="icon" aria-label="Profile details" onClick={() => setDetail('more')}>
                 <MoreHorizontal size={20} />
               </Button>
@@ -131,7 +143,7 @@ function Profile() {
               )}
               {c.rate != null && (
                 <span style={{ background: '#FFF7ED', color: '#9A3412', border: '1px solid #FED7AA', padding: '4px 12px', borderRadius: 999, fontSize: '0.74rem', fontWeight: 700 }}>
-                  Compute rate ${c.rate}/hr
+                  Compute rate ₹{c.rate}/hr
                 </span>
               )}
             </div>
