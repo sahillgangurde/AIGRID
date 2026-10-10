@@ -1,0 +1,4 @@
+{
+  "buildCommand": "npm --prefix frameforge_ui run build",
+  "outputDirectory": "frameforge_ui/.output/public"
+}
