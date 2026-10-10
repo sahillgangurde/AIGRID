@@ -1,4 +1,3 @@
 {
-  "buildCommand": "npm --prefix frameforge_ui run build",
-  "outputDirectory": "frameforge_ui/.output/public"
+  "buildCommand": "npm --prefix frameforge_ui install && npm --prefix frameforge_ui run build && node -e \"require('fs').cpSync('frameforge_ui/.vercel/output', '.vercel/output', {recursive: true})\""
 }
