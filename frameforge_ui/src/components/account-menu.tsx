@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { Bell, BellDot, LayoutDashboard, LogOut, Settings, User, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -24,6 +24,7 @@ const sampleNotifications = [
 ];
 
 export function AccountMenu({ session }: { session: DemoSession }) {
+  const isHome = useRouterState({ select: s => s.location.pathname === '/' });
   const [read, setRead] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
 
@@ -82,6 +83,6 @@ export function AccountMenu({ session }: { session: DemoSession }) {
       onOpenChange={setTermsOpen}
       userEmail={session.email}
     />
-    <MessagesDock />
+    {!isHome && <MessagesDock />}
   </>;
 }
